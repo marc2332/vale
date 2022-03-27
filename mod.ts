@@ -92,7 +92,7 @@ await new Command()
 
     await Deno.writeTextFile(
       join(helloWorldCategoryPath, "__category.md"),
-`---
+      `---
 title: 1. Hello World
 ---
 

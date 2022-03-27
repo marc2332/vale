@@ -2,10 +2,9 @@ import { Marked } from "https://deno.land/x/markdown@v2.0.0/mod.ts";
 import {
   basename,
   dirname,
-  fromFileUrl,
   join,
 } from "https://deno.land/std@0.122.0/path/mod.ts";
-import { cache } from "https://deno.land/x/cache/mod.ts";
+import { cache } from "https://deno.land/x/cache@0.2.13/mod.ts";
 
 interface CategoryData {
   name: string;
@@ -39,7 +38,7 @@ interface ContentDoc {
   entries: DocEntry[];
 }
 
-const __dirname = dirname(fromFileUrl(import.meta.url));
+const __dirname = dirname(import.meta.url);
 
 // Cache the SVG menu icon
 const svgMenuPath = join(__dirname, "menu.svg");
