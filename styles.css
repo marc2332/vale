@@ -1,15 +1,19 @@
 body {
     margin: 0px;
-    display: flex;
     font-family: ui-sans-serif, system-ui, sans-serif;
     height: 100%;
+}
+
+#content {
+    display: flex;
+    height: calc(100% - 50px);
 }
 
 #sidebar {
     padding: 30px;
     background: rgb(250, 250, 250);
     border-right: 1px solid rgb(240, 240, 240);
-    width: 230px;
+    min-width: 160px;
     overflow: auto;
 }
 
@@ -29,7 +33,7 @@ body {
 }
 
 #sidebar li {
-   margin: 5px 0px;
+    margin: 5px 0px;
 }
 
 #sidebar a.active {
@@ -45,25 +49,30 @@ main {
     overflow: auto;
 }
 
-main > div {
-    min-width: 400px;
-    width: 50%;
+main>div {
+    min-width: 450px;
+    width: 60%;
+    max-width: 70%;
 }
 
 main li {
     line-height: 25px;
 }
 
-main h1, h2, h3, h4, h5 {
+main h1, main h2, main h3, main h4, main h5 {
     border-bottom: 1px solid rgb(200, 200, 200);
     line-height: 60px;
 }
 
-main code { 
+main pre {
     background: rgb(250, 250, 250);
     border: 1px solid rgb(240, 240, 240);
-    padding: 1px 5px;
+    padding: 8px;
     border-radius: 6px;
+}
+
+main code {
+    background: transparent !important;
 }
 
 main a {
@@ -73,4 +82,102 @@ main a {
 
 main a:hover {
     text-decoration: underline;
+}
+
+#navbar {
+    height: 50px;
+    box-sizing: border-box;
+    border-bottom: 1px solid rgb(240, 240, 240);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#navbar button {
+    display: none;
+    border: none;
+    background: transparent;
+    padding: 7px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    margin-right: 10px;
+}
+
+#navbar button:hover {
+    background: rgb(250, 250, 250);
+    border: 1px solid rgb(240, 240, 240);
+}
+
+#navbar button svg {
+    height: 15px;
+    width: 15px;
+}
+
+#navbar h4 {
+    margin: 0px;
+    padding: 10px 20px;
+    display: inline-block;
+}
+
+#language {
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    border: 1px solid rgb(240, 240, 240);
+    background: rgb(250, 250, 250);
+}
+
+#language:focus {
+    border: 1px solid rgb(240, 240, 240);
+}
+
+#navigators {
+    padding: 10px;
+}
+
+#navigators>a>button {
+    background: transparent;
+    border-radius: 5px;
+    border: none;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    cursor: pointer;
+
+}
+
+#navigators>a.prev {
+    float: left;
+}
+
+#navigators>a.next {
+    float: right;
+}
+
+#navigators>a>button:hover {
+    border: 1px solid rgb(240, 240, 240);
+}
+
+#navigators>a>button {
+    text-decoration: none;
+    color: black;
+}
+
+@media only screen and (max-width: 650px) {
+    #sidebar {
+        display: none;
+        position: fixed;
+        top: 50px;
+        left: 0;
+        height: 100vh;
+    }
+
+    main>div {
+        min-width: 0px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #navbar button {
+        display: block;
+    }
 }

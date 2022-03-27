@@ -1,3 +1,9 @@
 {
-    "title": "Example"
+  "title": "Vale",
+  "languages": [
+    {
+      "name": "English",
+      "code": "en"
+    }
+  ]
 }

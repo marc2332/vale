@@ -1,193 +1,109 @@
-import { Marked } from "https://deno.land/x/markdown@v2.0.0/mod.ts";
-import { basename, dirname, fromFileUrl, join } from "https://deno.land/std@0.122.0/path/mod.ts";
+import { join } from "https://deno.land/std@0.122.0/path/mod.ts";
+import { Command, CompletionsCommand, HelpCommand } from "./deps.ts";
+import build from "./vale.ts";
+import { serve } from "https://deno.land/std@0.132.0/http/server.ts";
+import {
+  serveDir,
+  serveFile,
+} from "https://deno.land/std@0.132.0/http/file_server.ts";
 
-const rootFolder = Deno.args[0];
+await new Command()
+  .name("vale")
+  .version("0.1.0")
+  .global()
+  .description(`Manage Vale projects`)
+  .command("help", new HelpCommand().global())
+  .command("completions", new CompletionsCommand())
+  .command(
+    "watch <dir:string> [optional]",
+    "Run the documentation in development mode.",
+  )
+  .action(async (_, dir: string) => {
+    const projectPath = join(Deno.cwd(), dir);
+    const distPath = join(projectPath || "", "dist");
 
-interface TreeFile {
-    title: string,
-    content?: string,
-    entries?: Array<TreeFile>
-}
+    const defaultRoute = await build(projectPath);
 
-type Tree = Array<TreeFile | TreeFile>
-
-
-async function getDocsFromFile(filePath: string) : Promise<TreeFile> {
-    const content = await Deno.readTextFile(filePath);
-    const markup = Marked.parse(content);
-    return {
-        title: markup.meta.title,
-        content: markup.content
-    }
-}
-
-
-
-async function lookInFolder(folder: string): Promise<Array<TreeFile>> {
-    const entries = Deno.readDir(folder);
-    const treeFiles = []
-    for await (const entry of entries){
-        
-        if(entry.isFile){
-            const treeFile = await getDocsFromFile(join(folder, entry.name));
-            treeFiles.push(treeFile)
-        }
-    }
-    return treeFiles;
-}
-
-async function getCategoryData(folderPath: string, entries: Array<TreeFile>): Promise<TreeFile> {
-    const dataFilePath = join(folderPath, "__category.md");
-    try {
-        const treeFile = await getDocsFromFile(dataFilePath);
-        return {
-            ...treeFile,
-            entries
-        }
-    } catch {
-        return {
-            title: basename(folderPath),
-            entries
-        }
-    } 
-}
-
-interface Metadata {
-    title: string
-}
-
-const folderMetadata: Metadata = JSON.parse(await Deno.readTextFile(join(Deno.cwd(), rootFolder, "metadata.json")));
-console.log(folderMetadata)
-const folderEntries = Deno.readDir(rootFolder);
-const tree: Tree = []
-
-for await (const entry of folderEntries){
-    if(entry.isDirectory){
-        const folderPath = join(rootFolder, entry.name);
-        const files = await lookInFolder(folderPath);
-        const data = await getCategoryData(folderPath, files);
-        tree.push(data);
-    }
-}
-
-function sidebarToHTML(sidebar: Map<string, ContentDoc>, entryActiveTitle: string): string {
-
-    let code = '';
-    sidebar.forEach(({ entry: categoryEntry, entries }, category) => {
-        const categoryID = join(categoryEntry.path, categoryEntry.path)
-        const isCategoryActive = entryActiveTitle == categoryEntry.title;
-        code += `
-            <div>
-                <a class="${isCategoryActive ? "active" : ""}" href="/${categoryID}.html"><b>${category}</b></a>
-                <div>
-                   <ul>
-                    ${entries.map(entry => {
-                        const isNotCategoryDoc = categoryEntry.path !== entry.path;
-                        const linkID = join(categoryEntry.path, entry.path);
-                        const isActive = entryActiveTitle == entry.title;
-
-                        return isNotCategoryDoc && `<li><a class="${isActive ? "active" : ""}" href="/${linkID}.html">${entry.title}</a></li>`  
-                    }).filter(Boolean).join("")}
-                   </ul>
-                </div>
-            </div>
-        `
+    serve((req) => {
+      const pathname = new URL(req.url).pathname;
+      if (pathname === "/") {
+        return serveFile(req, defaultRoute);
+      } else {
+        return serveDir(req, {
+          fsRoot: distPath,
+        });
+      }
+    }, {
+      port: 3500,
     });
 
-    return `
-        <div id="sidebar">
-            ${code}
-        </div>
-    `
-}
+    console.log("Development server running on http://localhost:3500/");
 
-function getDocEntry(treeFile: TreeFile): DocEntry {
-    return {
-        content: treeFile.content || "",
-        path: `${treeFile.title.replace(/\s/g,"")}`,
-        title: treeFile.title
+    const watcher = Deno.watchFs(projectPath);
+    for await (const event of watcher) {
+      if (event.paths.find((path) => path.startsWith(distPath))) {
+        continue;
+      }
+      await build(projectPath);
     }
-}
+  })
+  .command(
+    "build <dir:string> [optional]",
+    "Build the documentation.",
+  )
+  .action(async (_, dir: string) => {
+    const projectPath = join(Deno.cwd(), dir);
+    await build(projectPath);
+    console.log("Built successfully");
+  })
+  .command(
+    "init <title:string> [optional]",
+    "Create a new project.",
+  )
+  .action(async (_, title: string) => {
+    const projectPath = join(Deno.cwd(), title);
+    const langPath = join(projectPath, "en");
 
-interface DocEntry {
-    content: string,
-    path: string,
-    title: string
-}
+    await Deno.mkdir(langPath, { recursive: true });
 
-interface ContentDoc { 
-    entry: DocEntry, 
-    entries: DocEntry[]
-}
+    await Deno.writeTextFile(
+      join(projectPath, "metadata.json"),
+      JSON.stringify({
+        title,
+        languages: [
+          {
+            name: "English",
+            code: "en",
+          },
+        ],
+      }),
+    );
 
-const content: Map<string, ContentDoc> = new Map();
+    await Deno.writeTextFile(
+      join(langPath, "sidebar.json"),
+      JSON.stringify({
+        "1. Hello World": [],
+      }),
+    );
 
-for (const treeCategory of tree){
-    if(treeCategory.entries != null){
+    const helloWorldCategoryPath = join(langPath, "hello_world");
 
-        const categoryEntry = getDocEntry(treeCategory);
+    await Deno.mkdir(helloWorldCategoryPath);
 
-        content.set(treeCategory.title, {
-            entry: categoryEntry,
-            entries: []
-        });
+    await Deno.writeTextFile(
+      join(helloWorldCategoryPath, "__category.md"),
+`---
+title: 1. Hello World
+---
 
-        const contentCategory = content.get(treeCategory.title);        
+# 👋 Hello World
 
-        for (const treeFile of treeCategory.entries){
-            if(treeFile.entries == null){
+Thanks for using Vale :)! Please give it a [⭐ Star](https://github.com/marc2332/vale)
+    
+`,
+    );
 
-                const fileEntry = getDocEntry(treeFile);
-
-                contentCategory?.entries.push(fileEntry);
-            }
-        }
-    }
-}
-
-
-
-
-
-
-function docToHTML(entry: DocEntry): string {
-
-    const sidebarHTML = sidebarToHTML(content, entry.title);
-
-    return `
-        <html>
-            <head>
-                <meta charset="UTF-8">
-                <link rel="stylesheet" href="/styles.css"></link>
-                <title>${entry.title} | ${folderMetadata.title}</title>
-            </head>
-            <body>
-                ${sidebarHTML}
-                <main>
-                    <div>
-                        ${entry.content}
-                    </div>
-                </main
-            </body>
-        </html>
-    `
-}
-
-const dist = join(Deno.cwd(), "dist")
-
-content.forEach( async({ entry, entries }) => {
-    const folderPath = join(dist, entry.path);
-    await Deno.mkdir(folderPath, { recursive: true });
-
-    await Promise.all(entries.map( async(entry) => {
-        const code = docToHTML(entry);
-        const filePath = `${join(folderPath, entry.path)}.html`;
-        await Deno.writeTextFile(filePath, code);
-    }));
-}) 
-
-const __dirname = dirname(fromFileUrl(import.meta.url));
-const stylesPath = join(__dirname, "styles.css");
-const stylesDistPath = join(dist, "styles.css");
-
-await Deno.copyFile(stylesPath, stylesDistPath);
+    console.log("Created successfully!");
+    console.log(`To run use 'vale watch ${title}'`);
+  })
+  .parse(Deno.args);
