@@ -269,7 +269,7 @@ function sidebarToHTML(
 function getDocEntry(treeFile: TreeFile, categoryTree: TreeFile): DocEntry {
   return {
     content: treeFile.content || "",
-    path: `${categoryTree.path}/${parse(treeFile.path).name}`,
+    path: `${categoryTree.path}/${treeFile.path}`,
     title: treeFile.title,
   };
 }
