@@ -1,3 +1,5 @@
+# 📝 Vale
+
 **Vale** is a static documentation generator, designed for speed, simplicity and
 readability. Built with Deno, but you can use it for any project. Inspired by
 [Deno Manual](https://deno.land/manual) and
