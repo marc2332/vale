@@ -3,6 +3,7 @@ import {
   basename,
   dirname,
   join,
+  parse,
 } from "https://deno.land/std@0.122.0/path/mod.ts";
 import { cache } from "https://deno.land/x/cache@0.2.13/mod.ts";
 
@@ -268,7 +269,7 @@ function sidebarToHTML(
 function getDocEntry(treeFile: TreeFile, categoryTree: TreeFile): DocEntry {
   return {
     content: treeFile.content || "",
-    path: `${categoryTree.path}/${treeFile.path}`,
+    path: `${categoryTree.path}/${parse(treeFile.path).name}`,
     title: treeFile.title,
   };
 }
