@@ -52,7 +52,7 @@ export default async function build(projectFolder: string): Promise<string> {
   const folderMetadata: Metadata = JSON.parse(
     await Deno.readTextFile(join(projectFolder, "metadata.json")),
   );
-  let initialRoute = "";
+  let initialRoute: string[] = [];
 
   // Create the dist folder
   const projectDist = join(projectFolder, "dist");
@@ -136,7 +136,10 @@ export default async function build(projectFolder: string): Promise<string> {
     }));
   }
 
-  return initialRoute;
+  const indexFilePath = join(projectDist, `index.html`);
+  await Deno.writeTextFile(indexFilePath, initialRoute[1]);
+
+  return initialRoute[0];
 }
 
 async function getDocsFromFile(filePath: string): Promise<TreeFile> {
@@ -341,7 +344,7 @@ async function processCategory(
   orderedContent: CategoryData[],
   prevEntry?: DocEntry,
   nextEntry?: DocEntry,
-): Promise<string> {
+): Promise<string[]> {
   // Use the the next category as next page
   let nextCategoryEntry = nextEntry;
 
@@ -379,5 +382,5 @@ async function processCategory(
   );
   const filePath = join(dist, `${categoryEntry.path}.html`);
   await Deno.writeTextFile(filePath, code);
-  return filePath;
+  return [filePath, code];
 }
