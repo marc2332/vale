@@ -16,7 +16,7 @@ I plan to add other features such as a searcher, third-party links on the navbar
 Install Vale with Deno:
 
 ```bash
-deno install --allow-read --allow-write --allow-net --unstable -n vale https://deno.land/x/vale/mod.ts
+deno install --allow-env --allow-read --allow-write --allow-net --unstable -n vale https://deno.land/x/vale/mod.ts
 ```
 
 Create and run a basic project:
