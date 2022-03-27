@@ -23,5 +23,5 @@ jobs:
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "vale-2"
+          project: "vale"
           entrypoint: "./website.ts"
