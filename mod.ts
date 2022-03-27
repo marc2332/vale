@@ -27,7 +27,7 @@ await new Command()
     serve((req) => {
       const pathname = new URL(req.url).pathname;
       if (pathname === "/") {
-        return serveFile(req, defaultRoute);
+        return serveFile(req, defaultRoute.path);
       } else {
         return serveDir(req, {
           fsRoot: distPath,

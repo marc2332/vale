@@ -38,6 +38,12 @@ interface ContentDoc {
   entries: DocEntry[];
 }
 
+interface ProcessResult {
+  code: string;
+  path: string;
+  lastEntry: DocEntry | undefined;
+}
+
 const __dirname = dirname(import.meta.url);
 
 // Cache the SVG menu icon
@@ -48,11 +54,14 @@ const svgMenu = await Deno.readTextFile(svgMenuPathCached);
 const stylesPath = join(__dirname, "styles.css");
 const stylesPathCached = (await cache(stylesPath)).path;
 
-export default async function build(projectFolder: string): Promise<string> {
+export default async function build(
+  projectFolder: string,
+): Promise<ProcessResult> {
   const folderMetadata: Metadata = JSON.parse(
     await Deno.readTextFile(join(projectFolder, "metadata.json")),
   );
-  let initialRoute: string[] = [];
+
+  let result = {} as ProcessResult;
 
   // Create the dist folder
   const projectDist = join(projectFolder, "dist");
@@ -117,29 +126,37 @@ export default async function build(projectFolder: string): Promise<string> {
 
     const orderedContent = orderSidebarCategories(sidebarConfig, docContents);
 
-    await Promise.all(orderedContent.map(async ({ doc }, categoryIndex) => {
-      const prevDoc = orderedContent[categoryIndex - 1];
-      const nextDoc = orderedContent[categoryIndex + 1];
-      const distFile = await processCategory(
+    let lastEntry: DocEntry | undefined;
+    let categoryIndex = 0;
+
+    for (const { doc } of orderedContent) {
+      const prevCategoryDoc = orderedContent[categoryIndex - 1];
+      const nextCategoryDoc = orderedContent[categoryIndex + 1];
+
+      const processResult = await processCategory(
         folderMetadata,
         langFolder.name,
         dist,
         doc,
         orderedContent,
-        prevDoc?.doc?.entry,
-        nextDoc?.doc?.entry,
+        lastEntry || prevCategoryDoc?.doc?.entry,
+        nextCategoryDoc?.doc?.entry,
       );
 
+      lastEntry = processResult.lastEntry;
+
       if (categoryIndex === 0) {
-        initialRoute = distFile;
+        result = processResult;
       }
-    }));
+
+      categoryIndex++;
+    }
   }
 
   const indexFilePath = join(projectDist, `index.html`);
-  await Deno.writeTextFile(indexFilePath, initialRoute[1]);
+  await Deno.writeTextFile(indexFilePath, result.code);
 
-  return initialRoute[0];
+  return result;
 }
 
 async function getDocsFromFile(filePath: string): Promise<TreeFile> {
@@ -342,18 +359,21 @@ async function processCategory(
   dist: string,
   { entry: categoryEntry, entries }: ContentDoc,
   orderedContent: CategoryData[],
-  prevEntry?: DocEntry,
-  nextEntry?: DocEntry,
-): Promise<string[]> {
+  prevCategoryEntry?: DocEntry,
+  nextCategoryEntry?: DocEntry,
+): Promise<ProcessResult> {
   // Use the the next category as next page
-  let nextCategoryEntry = nextEntry;
+  let nextCategoryEntryConfig = nextCategoryEntry;
+
+  // Save last entry for the next categories
+  let lastEntry: DocEntry | undefined;
 
   const folderPath = join(dist, dirname(categoryEntry.path));
   await Deno.mkdir(folderPath, { recursive: true });
 
   await Promise.all(entries.map(async (fileEntry, fileIndex) => {
     const prevEntry = entries[fileIndex - 1] || categoryEntry;
-    const nextEntry = entries[fileIndex + 1] || null;
+    const nextEntry = entries[fileIndex + 1] || nextCategoryEntry;
 
     const code = docToHTML(
       folderMetadata,
@@ -368,7 +388,10 @@ async function processCategory(
 
     if (fileIndex === 0) {
       // Use the first category entry as the next page for the category
-      nextCategoryEntry = fileEntry;
+      nextCategoryEntryConfig = fileEntry;
+    }
+    if (fileIndex == entries.length - 1) {
+      lastEntry = fileEntry;
     }
   }));
 
@@ -377,10 +400,14 @@ async function processCategory(
     langCode,
     categoryEntry,
     orderedContent,
-    prevEntry,
-    nextCategoryEntry,
+    prevCategoryEntry,
+    nextCategoryEntryConfig,
   );
   const filePath = join(dist, `${categoryEntry.path}.html`);
   await Deno.writeTextFile(filePath, code);
-  return [filePath, code];
+  return {
+    code,
+    path: filePath,
+    lastEntry,
+  };
 }
