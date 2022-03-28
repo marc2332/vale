@@ -156,6 +156,7 @@ main blockquote {
     cursor: pointer;
     text-decoration: none;
     color: black;
+    margin-bottom: 35px;
 }
 
 #navigators>a.prev {
