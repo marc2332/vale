@@ -64,10 +64,10 @@ const stylesPath = join(__dirname, "styles.css");
 const stylesPathCached = (await cache(stylesPath)).path;
 
 export default async function build(
-  projectFolder: string
+  projectFolder: string,
 ): Promise<ProcessResult> {
   const folderMetadata: Metadata = JSON.parse(
-    await Deno.readTextFile(join(projectFolder, "metadata.json"))
+    await Deno.readTextFile(join(projectFolder, "metadata.json")),
   );
 
   let result = {} as ProcessResult;
@@ -90,7 +90,7 @@ export default async function build(
 
     // Get the sidebar configuration
     const sidebarConfig: Sidebar = JSON.parse(
-      await Deno.readTextFile(join(categoryFolder, "sidebar.json"))
+      await Deno.readTextFile(join(categoryFolder, "sidebar.json")),
     );
 
     // Create the dist folder for the language
@@ -149,7 +149,7 @@ export default async function build(
         doc,
         orderedContent,
         lastEntry || prevCategoryDoc?.doc?.entry,
-        nextCategoryDoc?.doc?.entry
+        nextCategoryDoc?.doc?.entry,
       );
       lastEntry = processResult.lastEntry;
       if (categoryIndex === 0) {
@@ -189,7 +189,7 @@ async function lookInFolder(folder: string): Promise<Array<TreeFile>> {
 
 async function getCategoryData(
   folderPath: string,
-  entries: Array<TreeFile>
+  entries: Array<TreeFile>,
 ): Promise<TreeFile> {
   const dataFilePath = join(folderPath, "__category.md");
   try {
@@ -210,7 +210,7 @@ async function getCategoryData(
 
 function orderSidebarCategories(
   sidebarConfig: Sidebar,
-  docContents: Map<string, ContentDoc>
+  docContents: Map<string, ContentDoc>,
 ): CategoryData[] {
   return Object.entries(sidebarConfig).map(([name, entries]) => {
     const doc = docContents.get(name);
@@ -237,7 +237,7 @@ function orderSidebarCategories(
 function sidebarToHTML(
   langCode: string,
   categories: CategoryData[],
-  entryActiveTitle: string
+  entryActiveTitle: string,
 ): string {
   const links = categories
     .map(({ name, doc: { entry: categoryEntry, entries } }) => {
@@ -288,7 +288,7 @@ function docToHTML(
   entry: DocEntry,
   orderedContent: CategoryData[],
   prevEntry?: DocEntry,
-  nextEntry?: DocEntry
+  nextEntry?: DocEntry,
 ): string {
   const sidebarHTML = sidebarToHTML(langCode, orderedContent, entry.title);
 
@@ -399,7 +399,7 @@ async function processCategory(
   { entry: categoryEntry, entries }: ContentDoc,
   orderedContent: CategoryData[],
   prevCategoryEntry?: DocEntry,
-  nextCategoryEntry?: DocEntry
+  nextCategoryEntry?: DocEntry,
 ): Promise<ProcessResult> {
   // Use the the next category as next page
   let nextCategoryEntryConfig = nextCategoryEntry;
@@ -427,7 +427,7 @@ async function processCategory(
           fileEntry,
           orderedContent,
           prevEntry,
-          nextEntry
+          nextEntry,
         );
         const filePath = `${fileEntry.path}.html`;
         await Deno.writeTextFile(join(dist, filePath), code);
@@ -439,8 +439,8 @@ async function processCategory(
         if (fileIndex == listEntries.length - 1) {
           lastEntry = fileEntry;
         }
-      }
-    )
+      },
+    ),
   );
 
   const code = docToHTML(
@@ -449,7 +449,7 @@ async function processCategory(
     categoryEntry,
     orderedContent,
     prevCategoryEntry,
-    nextCategoryEntryConfig
+    nextCategoryEntryConfig,
   );
   const filePath = join(dist, `${categoryEntry.path}.html`);
   await Deno.writeTextFile(filePath, code);

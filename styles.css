@@ -76,7 +76,6 @@ main {
     overflow: auto;
     background-color: var(--bkg-color);
     color: var(--text-color);
-
 }
 
 main > div {
@@ -100,30 +99,29 @@ main pre {
     padding: 8px;
     border-radius: 6px;
     color:var(--text-color);
-
 }
 main code::-webkit-scrollbar {
     width: 12px;
     height: 12px;
-    }
+}
     
-    main code::-webkit-scrollbar-track {
+main code::-webkit-scrollbar-track {
     background: #f5f5f5;
     border-radius: 10px;
-    }
+}
     
-    main code::-webkit-scrollbar-thumb {
+main code::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: #ccc;  
-    }
+}
     
-    main code::-webkit-scrollbar-thumb:hover {
+main code::-webkit-scrollbar-thumb:hover {
     background: #999;  
-    }
+}
+
 main code {
     background: transparent !important;
     color:var(--text-color) !important;
-
 }
 
 main a {
@@ -149,14 +147,11 @@ main blockquote {
     height: 50px;
     box-sizing: border-box;
     border-bottom: 1px solid var(--border);
-
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: var(--bkg-color);
     color: var(--text-color);
-
-
 }
 
 #navbar button {
@@ -168,7 +163,6 @@ main blockquote {
     border: 1px solid transparent;
     margin-right: 10px;
     color: var(--text-color);
-
 }
 
 #navbar button:hover {
@@ -195,6 +189,7 @@ main blockquote {
     margin-left: 10px;
     display: inline-flex;
 }
+
 #navbar span button {
     display: block;
     border: none;
@@ -205,8 +200,8 @@ main blockquote {
     border: 1px solid transparent;
     margin-right: 10px;
     color: var(--text-color);
-
 }
+
 #navbar span button svg {
     height: 18px;
     width: 18px;
@@ -225,7 +220,6 @@ main blockquote {
     border: 1px solid rgb(240, 240, 240);
     background: var(--bkg-color);
     color:var(--text-color);
-
 }
 
 #language:focus, #them:focus {
@@ -258,7 +252,6 @@ main blockquote {
 #navigators>a.next {
     float: right;
     color: var(--text-color);
-
 }
 
 #navigators>a>button:hover {
