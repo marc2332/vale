@@ -47,17 +47,25 @@ interface ProcessResult {
 
 const __dirname = dirname(import.meta.url);
 
-// Cache the SVG menu icon
+// Cache the SVG files
 const svgMenuPath = join(__dirname, "menu.svg");
 const svgMenuPathCached = (await cache(svgMenuPath)).path;
 const svgMenu = await Deno.readTextFile(svgMenuPathCached);
+
+const sunSvgPath = join(__dirname, "sun.svg");
+const sunSvgPathCached = (await cache(sunSvgPath)).path;
+const sunSvg = await Deno.readTextFile(sunSvgPathCached);
+
+const moonSvgPath = join(__dirname, "moon.svg");
+const moonSvgPathCached = (await cache(moonSvgPath)).path;
+const moonSvg = await Deno.readTextFile(moonSvgPathCached);
 
 const stylesPath = join(__dirname, "styles.css");
 const stylesPathCached = (await cache(stylesPath)).path;
 
 export default async function build(
   projectFolder: string,
-) {
+){
   const folderMetadata: Metadata = JSON.parse(
     await Deno.readTextFile(join(projectFolder, "metadata.json")),
   );
@@ -145,13 +153,10 @@ export default async function build(
         lastEntry || prevCategoryDoc?.doc?.entry,
         nextCategoryDoc?.doc?.entry,
       );
-
       lastEntry = processResult.lastEntry;
-
       if (categoryIndex === 0) {
         result.push(processResult);
       }
-
       categoryIndex++;
     }
 
@@ -216,9 +221,7 @@ function orderSidebarCategories(
     const doc = docContents.get(name);
     if (doc != null) {
       // Order the entries by the sidebar or der
-
       const filteredEntries = new Map();
-
       entries.forEach((entryTitle) => {
         const res = doc.entries.get(entryTitle);
         if (res != null) {
@@ -241,20 +244,22 @@ function sidebarToHTML(
   categories: CategoryData[],
   entryActiveTitle: string,
 ): string {
-  const links = categories.map(
-    ({ name, doc: { entry: categoryEntry, entries } }) => {
+  const links = categories
+    .map(({ name, doc: { entry: categoryEntry, entries } }) => {
       const isCategoryActive = entryActiveTitle == categoryEntry.title;
       const categoryClass = isCategoryActive ? "active" : "";
-
-      const categoryEntries = Array.from(entries).map(([_, entry]) => {
-        const isNotCategoryDoc = categoryEntry.path !== entry.path;
-        const isActive = entryActiveTitle == entry.title;
-        const entryClass = isActive ? "active" : "";
-
-        return isNotCategoryDoc &&
-          `<li><a class="${entryClass}" href="/${langCode}/${entry.path}.html">${entry.title}</a></li>`;
-      }).filter(Boolean).join("");
-
+      const categoryEntries = Array.from(entries)
+        .map(([_, entry]) => {
+          const isNotCategoryDoc = categoryEntry.path !== entry.path;
+          const isActive = entryActiveTitle == entry.title;
+          const entryClass = isActive ? "active" : "";
+          return (
+            isNotCategoryDoc &&
+            `<li><a class="${entryClass}" href="/${langCode}/${entry.path}.html">${entry.title}</a></li>`
+          );
+        })
+        .filter(Boolean)
+        .join("");
       return `
         <div>
             <a class="${categoryClass}" href="/${langCode}/${categoryEntry.path}.html"><b>${name}</b></a>
@@ -265,9 +270,8 @@ function sidebarToHTML(
             </div>
         </div>
       `;
-    },
-  ).join("");
-
+    })
+    .join("");
   return `
     <div id="sidebar-menu">
       ${links}
@@ -313,7 +317,8 @@ function docToHTML(
                 <meta charset="UTF-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet" href="/styles.css"></link>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github.min.css"></link> 
+                <link id="hightlight-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github.min.css"></link> 
+                <link id="hightlight-dark"rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github-dark.min.css"></link> 
                 <title>${entry.title} | ${folderMetadata.title}</title>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
             </head>
@@ -322,8 +327,9 @@ function docToHTML(
                     <div>
                         <h4>${folderMetadata.title}</h4>
                         <select id="language" onchange="languageChanged()">${languages}</select>
+                        <button id="theme-toggler" onclick="toggleTheme()">${sunSvg}</button>
                     </div>
-                    <button onclick="toggleSideBar()">
+                    <button id="sidebar-toggler" onclick="toggleSideBar()">
                         ${svgMenu}
                     </button>
                 </div>
@@ -340,11 +346,47 @@ function docToHTML(
                     </main>
                 </div>
                 <script>
+                    const themeToggler = document.getElementById("theme-toggler"); 
+                    const isDarkMode = localStorage.getItem("valeTheme") === "true";
+
+                    loadTheme(isDarkMode);
+
+                    function updateToggler(isDarkMode){
+                      if(isDarkMode) {
+                        themeToggler.innerHTML = \`${moonSvg}\`;
+                        document.getElementById("hightlight-light").setAttribute("disabled", "disabled");
+                        document.getElementById("hightlight-dark").removeAttribute("disabled");
+                      }
+                      else{
+                        themeToggler.innerHTML = \`${sunSvg}\`;
+                        document.getElementById("hightlight-dark").setAttribute("disabled", "disabled");
+                        document.getElementById("hightlight-light").removeAttribute("disabled");
+                      }
+                    }
+
+                    function loadTheme(isDarkMode){
+                      updateToggler(isDarkMode)
+                      if(isDarkMode) {
+                        document.body.classList.toggle("dark-theme");
+                      } else{
+                        document.body.classList.remove("dark-theme");
+                      }  
+                    }
+
+                    function toggleTheme(){
+                      const isDarkMode = localStorage.getItem("valeTheme") === "true";
+                      console.log(!isDarkMode)
+                      loadTheme(!isDarkMode)
+                      localStorage.setItem("valeTheme", !isDarkMode);
+                    }
+
                     const sidebar = document.getElementById("sidebar-menu");
+
                     function toggleSideBar(){
                         const isShown = sidebar.style.display === "block";
                         sidebar.style.display = isShown ? "none" : "block";
                     }
+
                     window.addEventListener("resize", () => {
                         if(document.body.clientWidth > 650){
                             sidebar.style.display = "block";
@@ -352,11 +394,13 @@ function docToHTML(
                             sidebar.style = "";
                         }
                     })
+
                     hljs.initHighlightingOnLoad();
                     function languageChanged(){
                         const newLang = document.getElementById("language").value;
                         location.pathname = '/' + newLang + location.pathname.slice(3)
                     }
+                    
                 </script>
             </body>
         </html>
@@ -374,7 +418,6 @@ async function processCategory(
 ): Promise<ProcessResult> {
   // Use the the next category as next page
   let nextCategoryEntryConfig = nextCategoryEntry;
-
   // Save last entry for the next categories
   let lastEntry: DocEntry | undefined;
 
@@ -384,10 +427,14 @@ async function processCategory(
   await Promise.all(
     Array.from(entries).map(
       async ([_title, fileEntry], fileIndex, listEntries) => {
-        const [_prevTitle, prevEntry] = listEntries[fileIndex - 1] ||
-          [null, categoryEntry];
-        const [_nextTitle, nextEntry] = listEntries[fileIndex + 1] ||
-          [null, nextCategoryEntry];
+        const [_prevTitle, prevEntry] = listEntries[fileIndex - 1] || [
+          null,
+          categoryEntry,
+        ];
+        const [_nextTitle, nextEntry] = listEntries[fileIndex + 1] || [
+          null,
+          nextCategoryEntry,
+        ];
 
         const code = docToHTML(
           folderMetadata,
