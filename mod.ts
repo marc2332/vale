@@ -1,4 +1,4 @@
-import { join } from "https://deno.land/std@0.122.0/path/mod.ts";
+import { extname, join } from "https://deno.land/std@0.122.0/path/mod.ts";
 import { Command, CompletionsCommand, HelpCommand } from "./deps.ts";
 import build from "./vale.ts";
 import { serve } from "https://deno.land/std@0.132.0/http/server.ts";
@@ -9,11 +9,11 @@ import {
 
 const PORT = Deno.env.get("PORT") || 3500;
 
-const serveCommand = (distPath: string, defaultRoute: string) => {
+const serveCommand = (distPath: string) => {
   serve((req) => {
     const pathname = new URL(req.url).pathname;
-    if (pathname === "/") {
-      return serveFile(req, defaultRoute);
+    if (extname(pathname) == "") {
+      return serveFile(req, join(distPath, pathname, "index.html"));
     } else {
       return serveDir(req, {
         fsRoot: distPath,
@@ -24,14 +24,12 @@ const serveCommand = (distPath: string, defaultRoute: string) => {
   });
 };
 
-const buildCommand = async (dir: string): Promise<[string, string, string]> => {
+const buildCommand = (dir: string): [string, string] => {
   const projectPath = join(Deno.cwd(), dir);
   const distPath = join(projectPath || "", "dist");
-  const defaultRoute = await build(projectPath);
   return [
     projectPath,
     distPath,
-    defaultRoute.path,
   ];
 };
 
@@ -90,9 +88,10 @@ await new Command()
     "Run the documentation in development mode.",
   )
   .action(async (_, dir: string) => {
-    const [projectPath, distPath, defaultRoute] = await buildCommand(dir);
+    const [projectPath, distPath] = buildCommand(dir);
+    await build(projectPath);
 
-    serveCommand(distPath, defaultRoute);
+    serveCommand(distPath);
 
     console.log(`Development server running on  on http://localhost:${PORT}/`);
 
@@ -130,11 +129,9 @@ await new Command()
     "Serve the documentation.",
   )
   .action((_, dir: string) => {
-    const projectPath = join(Deno.cwd(), dir);
-    const distPath = join(projectPath || "", "dist");
-    const defaultRoute = join(distPath, "index.html");
+    const [_projectPath, distPath] = buildCommand(dir);
 
-    serveCommand(distPath, defaultRoute);
+    serveCommand(distPath);
 
     console.log(`Serving documentation on http://localhost:${PORT}/`);
   })
