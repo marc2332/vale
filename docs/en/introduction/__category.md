@@ -11,6 +11,8 @@ readability. Built with Deno, but you can use it for any project. Inspired by
 [Deno Manual](https://deno.land/manual) and
 [mdbook](https://rust-lang.github.io/mdBook/).
 
+Source code is on [GitHub](https://github.com/marc2332/vale), please leave a star if you liked it ⭐ :)
+
 ## 🎉 Features
 
 - Multiple languages
