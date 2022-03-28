@@ -15,7 +15,7 @@ readability. Built with Deno, but you can use it for any project. Inspired by
 - Code blocks support
 
 I plan to add other features such as a searcher, third-party links on the
-navbar, "Edit on Github" link, page tags, SSR, etc...
+navbar, "Edit on Github" link, page tags, SSR, themes, etc...
 
 ## 📦 Installation
 
