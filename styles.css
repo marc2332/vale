@@ -49,7 +49,7 @@ main {
     overflow: auto;
 }
 
-main>div {
+main > div {
     min-width: 450px;
     width: 60%;
     max-width: 70%;
@@ -143,6 +143,10 @@ main blockquote {
     padding: 10px;
 }
 
+#navigators>a{
+    margin-bottom: 10px;
+}
+
 #navigators>a>button {
     background: transparent;
     border-radius: 5px;
@@ -150,7 +154,8 @@ main blockquote {
     padding: 8px 12px;
     border: 1px solid transparent;
     cursor: pointer;
-
+    text-decoration: none;
+    color: black;
 }
 
 #navigators>a.prev {
@@ -163,11 +168,6 @@ main blockquote {
 
 #navigators>a>button:hover {
     border: 1px solid rgb(240, 240, 240);
-}
-
-#navigators>a>button {
-    text-decoration: none;
-    color: black;
 }
 
 @media only screen and (max-width: 650px) {
