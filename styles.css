@@ -144,7 +144,7 @@ main blockquote {
 }
 
 #navigators>a{
-    margin-bottom: 10px;
+    margin-bottom: 35px;
 }
 
 #navigators>a>button {
@@ -156,7 +156,6 @@ main blockquote {
     cursor: pointer;
     text-decoration: none;
     color: black;
-    margin-bottom: 35px;
 }
 
 #navigators>a.prev {
