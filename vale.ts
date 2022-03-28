@@ -52,6 +52,14 @@ const svgMenuPath = join(__dirname, "menu.svg");
 const svgMenuPathCached = (await cache(svgMenuPath)).path;
 const svgMenu = await Deno.readTextFile(svgMenuPathCached);
 
+const sunSvgPath = join(__dirname, "sun.svg");
+const sunSvgPathCached = (await cache(sunSvgPath)).path;
+const sunSvg = await Deno.readTextFile(sunSvgPathCached);
+
+const moonSvgPath = join(__dirname, "moon.svg");
+const moonSvgPathCached = (await cache(moonSvgPath)).path;
+const moonSvg = await Deno.readTextFile(moonSvgPathCached);
+
 const stylesPath = join(__dirname, "styles.css");
 const stylesPathCached = (await cache(stylesPath)).path;
 
@@ -137,6 +145,7 @@ export default async function build(
       const processResult = await processCategory(
         folderMetadata,
         langFolder.name,
+        
         dist,
         doc,
         orderedContent,
@@ -281,6 +290,7 @@ function getDocEntry(treeFile: TreeFile, categoryTree: TreeFile): DocEntry {
 function docToHTML(
   folderMetadata: Metadata,
   langCode: string,
+
   entry: DocEntry,
   orderedContent: CategoryData[],
   prevEntry?: DocEntry,
@@ -293,6 +303,8 @@ function docToHTML(
       language.code === langCode ? "selected" : ""
     } >${language.name}</option>`;
   });
+
+  
 
   const prevButton = prevEntry
     ? `<a class="prev" href="/${langCode}/${prevEntry.path}.html"><button> ← ${prevEntry.title}</button></a>`
@@ -317,6 +329,11 @@ function docToHTML(
                     <div>
                         <h4>${folderMetadata.title}</h4>
                         <select id="language" onchange="languageChanged()">${languages}</select>
+                        <span>
+                          <button id="light" onclick="toggleTheme('light')">${sunSvg} </button>
+                          <button id="dark" onclick="toggleTheme('dark')">${moonSvg} </button>
+                        </span>
+
                     </div>
                     <button onclick="toggleSideBar()">
                         ${svgMenu}
@@ -335,6 +352,21 @@ function docToHTML(
                     </main>
                 </div>
                 <script>
+                    
+                    
+                    getInitialTheme();
+                    function getInitialTheme(){
+                      const theme = localStorage.getItem('valeTheme');
+                      
+                      if(theme==="dark") {
+                        document.getElementById("light").style.display = "none";
+                        document.body.classList.toggle("dark-theme");
+                      }
+                      else{
+                        document.getElementById("dark").style.display = "none";
+                      }
+                      
+                    }
                     const sidebar = document.getElementById("sidebar-menu");
                     function toggleSideBar(){
                         const isShown = sidebar.style.display === "block";
@@ -352,6 +384,22 @@ function docToHTML(
                         const newLang = document.getElementById("language").value;
                         location.pathname = '/' + newLang + location.pathname.slice(3)
                     }
+                    function toggleTheme(currentTheme){
+                      const theme = currentTheme === "dark" ? "light" : "dark"
+                      document.body.classList.toggle("dark-theme");
+                      if(theme==="dark") {
+                        document.getElementById("light").style.display = "none";
+                        document.getElementById("dark").style.display = "block";
+                      }
+                      else{
+                        document.getElementById("dark").style.display = "none";
+                        document.getElementById("light").style.display = "block";
+
+                      }
+                      localStorage.setItem('valeTheme', theme);
+
+                      
+                    }
                 </script>
             </body>
         </html>
@@ -361,6 +409,7 @@ function docToHTML(
 async function processCategory(
   folderMetadata: Metadata,
   langCode: string,
+ 
   dist: string,
   { entry: categoryEntry, entries }: ContentDoc,
   orderedContent: CategoryData[],
@@ -387,6 +436,8 @@ async function processCategory(
         const code = docToHTML(
           folderMetadata,
           langCode,
+          
+          
           fileEntry,
           orderedContent,
           prevEntry,
@@ -409,6 +460,7 @@ async function processCategory(
   const code = docToHTML(
     folderMetadata,
     langCode,
+   
     categoryEntry,
     orderedContent,
     prevCategoryEntry,

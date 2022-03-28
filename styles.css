@@ -2,7 +2,34 @@ body {
     margin: 0px;
     font-family: ui-sans-serif, system-ui, sans-serif;
     height: 100%;
+    --text-color: #222;
+    --bkg-color: #fff;
+    --theme--bkg-color: #bdbdbd;
+    --bkg-sidebar-color: #f3f3f3;
+    --border:rgb(240, 240, 240);
+    --pre-bkg:#fff;
+    --quote-bkg:rgb(255 242 220);
+    --quote-border: rgb(234 185 67);
+    --active-link-sidebar-color:rgb(0, 132, 255);
+    --hover-link-sidebar-color:rgb(100, 100, 100);
+    --main-a-color:rgb(0, 132, 255);
+
 }
+
+body.dark-theme {
+    --text-color: #eee;
+    --bkg-color: #181818;
+    --theme--bkg-color: #dfb630;
+    --bkg-sidebar-color: #141414;
+    --border:#5c5e6e;
+    --pre-bkg:#1d1f21;
+    --quote-bkg:#635f3a;
+    --quote-border: #979916;
+    --active-link-sidebar-color:rgb(21, 137, 190);
+    --hover-link-sidebar-color:rgb(170, 170, 170);
+    --main-a-color:rgb(41, 110, 238);
+
+  }
 
 #content {
     display: flex;
@@ -11,19 +38,19 @@ body {
 
 #sidebar-menu {
     padding: 30px;
-    background: rgb(250, 250, 250);
-    border-right: 1px solid rgb(240, 240, 240);
+    background: var(--bkg-sidebar-color);
+    border-right: 1px solid var(--border);
     min-width: 160px;
     overflow: auto;
 }
 
 #sidebar-menu a {
-    color: black;
+    color: var(--text-color);
     text-decoration: none;
 }
 
 #sidebar-menu a:hover {
-    color: rgb(100, 100, 100);
+    color: var(--hover-link-sidebar-color);
 }
 
 #sidebar-menu ul {
@@ -37,7 +64,7 @@ body {
 }
 
 #sidebar-menu a.active {
-    color: rgb(0, 132, 255)
+    color: var(--active-link-sidebar-color);
 }
 
 main {
@@ -47,6 +74,9 @@ main {
     justify-content: center;
     width: 100%;
     overflow: auto;
+    background-color: var(--bkg-color);
+    color: var(--text-color);
+
 }
 
 main > div {
@@ -60,24 +90,45 @@ main li {
 }
 
 main h1, main h2, main h3, main h4, main h5 {
-    border-bottom: 1px solid rgb(200, 200, 200);
+    border-bottom: 1px solid var(--border);
     line-height: 60px;
 }
 
 main pre {
-    background: rgb(250, 250, 250);
-    border: 1px solid rgb(240, 240, 240);
+    background: var(--pre-bkg);
+    border: 1px solid var(--border);
     padding: 8px;
     border-radius: 6px;
-}
+    color:var(--text-color);
 
+}
+main code::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+    }
+    
+    main code::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 10px;
+    }
+    
+    main code::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #ccc;  
+    }
+    
+    main code::-webkit-scrollbar-thumb:hover {
+    background: #999;  
+    }
 main code {
     background: transparent !important;
+    color:var(--text-color) !important;
+
 }
 
 main a {
     text-decoration: none;
-    color: rgb(0, 132, 255)
+    color: var(--main-a-color);
 }
 
 main a:hover {
@@ -87,18 +138,25 @@ main a:hover {
 main blockquote {
     padding: 10px 20px;
     margin: 5px 0px;
-    background: rgb(255 242 220);
-    border: 1px solid rgb(234 185 67);
+    background: var(--quote-bkg);
+    border: 1px solid var(--quote-border);
+
     border-radius: 8px;
+    color: var(--text-color);
 }
 
 #navbar {
     height: 50px;
     box-sizing: border-box;
-    border-bottom: 1px solid rgb(240, 240, 240);
+    border-bottom: 1px solid var(--border);
+
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: var(--bkg-color);
+    color: var(--text-color);
+
+
 }
 
 #navbar button {
@@ -109,6 +167,8 @@ main blockquote {
     border-radius: 5px;
     border: 1px solid transparent;
     margin-right: 10px;
+    color: var(--text-color);
+
 }
 
 #navbar button:hover {
@@ -120,22 +180,55 @@ main blockquote {
     height: 15px;
     width: 15px;
 }
-
+#navbar div {
+    display: flex;
+    height:30px;
+    align-items: center;
+}
 #navbar h4 {
     margin: 0px;
     padding: 10px 20px;
     display: inline-block;
 }
 
-#language {
+#navbar span {
+    margin-left: 10px;
+    display: inline-flex;
+}
+#navbar span button {
+    display: block;
+    border: none;
+    background: transparent;
+    padding: 4.5px;
+ 
+    border-radius: 5px;
+    border: 1px solid transparent;
+    margin-right: 10px;
+    color: var(--text-color);
+
+}
+#navbar span button svg {
+    height: 18px;
+    width: 18px;
+    display:block;
+}
+
+#navbar span button:hover {
+    background: var(--theme--bkg-color);
+    border: 1px solid rgb(240, 240, 240);
+}
+
+#language, #theme {
     padding: 5px;
     border: none;
     border-radius: 5px;
     border: 1px solid rgb(240, 240, 240);
-    background: rgb(250, 250, 250);
+    background: var(--bkg-color);
+    color:var(--text-color);
+
 }
 
-#language:focus {
+#language:focus, #them:focus {
     border: 1px solid rgb(240, 240, 240);
 }
 
@@ -155,7 +248,7 @@ main blockquote {
     border: 1px solid transparent;
     cursor: pointer;
     text-decoration: none;
-    color: black;
+    color: var(--text-color);
 }
 
 #navigators>a.prev {
@@ -164,6 +257,8 @@ main blockquote {
 
 #navigators>a.next {
     float: right;
+    color: var(--text-color);
+
 }
 
 #navigators>a>button:hover {
