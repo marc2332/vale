@@ -264,7 +264,7 @@ function sidebarToHTML(
   ).join("");
 
   return `
-    <div id="sidebar">
+    <div id="sidebar-menu">
       ${links}
     </div>
   `;
@@ -335,7 +335,7 @@ function docToHTML(
                     </main>
                 </div>
                 <script>
-                    const sidebar = document.getElementById("sidebar");
+                    const sidebar = document.getElementById("sidebar-menu");
                     function toggleSideBar(){
                         const isShown = sidebar.style.display === "block";
                         sidebar.style.display = isShown ? "none" : "block";

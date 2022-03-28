@@ -27,3 +27,5 @@ Create and run a basic project:
 vale init demo
 vale watch demo
 ```
+
+Please give it a [⭐ Star](https://github.com/marc2332/vale) if you like it :)
