@@ -47,7 +47,7 @@ interface ProcessResult {
 
 const __dirname = dirname(import.meta.url);
 
-// Cache the SVG menu icon
+// Cache the SVG files
 const svgMenuPath = join(__dirname, "menu.svg");
 const svgMenuPathCached = (await cache(svgMenuPath)).path;
 const svgMenu = await Deno.readTextFile(svgMenuPathCached);
@@ -312,7 +312,8 @@ function docToHTML(
                 <meta charset="UTF-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet" href="/styles.css"></link>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github.min.css"></link> 
+                <link id="hightlight-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github.min.css"></link> 
+                <link id="hightlight-dark"rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github-dark.min.css"></link> 
                 <title>${entry.title} | ${folderMetadata.title}</title>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
             </head>
@@ -321,12 +322,9 @@ function docToHTML(
                     <div>
                         <h4>${folderMetadata.title}</h4>
                         <select id="language" onchange="languageChanged()">${languages}</select>
-                        <span>
-                          <button id="light" onclick="toggleTheme('light')">${sunSvg} </button>
-                          <button id="dark" onclick="toggleTheme('dark')">${moonSvg} </button>
-                        </span>
+                        <button id="theme-toggler" onclick="toggleTheme()">${sunSvg}</button>
                     </div>
-                    <button onclick="toggleSideBar()">
+                    <button id="sidebar-toggler" onclick="toggleSideBar()">
                         ${svgMenu}
                     </button>
                 </div>
@@ -343,24 +341,47 @@ function docToHTML(
                     </main>
                 </div>
                 <script>
-                    getInitialTheme();
-                    function getInitialTheme(){
-                      const theme = localStorage.getItem('valeTheme');
-                      
-                      if(theme==="dark") {
-                        document.getElementById("light").style.display = "none";
-                        document.body.classList.toggle("dark-theme");
+                    const themeToggler = document.getElementById("theme-toggler"); 
+                    const isDarkMode = localStorage.getItem("valeTheme") === "true";
+
+                    loadTheme(isDarkMode);
+
+                    function updateToggler(isDarkMode){
+                      if(isDarkMode) {
+                        themeToggler.innerHTML = \`${moonSvg}\`;
+                        document.getElementById("hightlight-light").setAttribute("disabled", "disabled");
+                        document.getElementById("hightlight-dark").removeAttribute("disabled");
                       }
                       else{
-                        document.getElementById("dark").style.display = "none";
+                        themeToggler.innerHTML = \`${sunSvg}\`;
+                        document.getElementById("hightlight-dark").setAttribute("disabled", "disabled");
+                        document.getElementById("hightlight-light").removeAttribute("disabled");
                       }
-                      
                     }
+
+                    function loadTheme(isDarkMode){
+                      updateToggler(isDarkMode)
+                      if(isDarkMode) {
+                        document.body.classList.toggle("dark-theme");
+                      } else{
+                        document.body.classList.remove("dark-theme");
+                      }  
+                    }
+
+                    function toggleTheme(){
+                      const isDarkMode = localStorage.getItem("valeTheme") === "true";
+                      console.log(!isDarkMode)
+                      loadTheme(!isDarkMode)
+                      localStorage.setItem("valeTheme", !isDarkMode);
+                    }
+
                     const sidebar = document.getElementById("sidebar-menu");
+
                     function toggleSideBar(){
                         const isShown = sidebar.style.display === "block";
                         sidebar.style.display = isShown ? "none" : "block";
                     }
+
                     window.addEventListener("resize", () => {
                         if(document.body.clientWidth > 650){
                             sidebar.style.display = "block";
@@ -368,24 +389,13 @@ function docToHTML(
                             sidebar.style = "";
                         }
                     })
+
                     hljs.initHighlightingOnLoad();
                     function languageChanged(){
                         const newLang = document.getElementById("language").value;
                         location.pathname = '/' + newLang + location.pathname.slice(3)
                     }
-                    function toggleTheme(currentTheme){
-                      const theme = currentTheme === "dark" ? "light" : "dark"
-                      document.body.classList.toggle("dark-theme");
-                      if(theme==="dark") {
-                        document.getElementById("light").style.display = "none";
-                        document.getElementById("dark").style.display = "block";
-                      }
-                      else{
-                        document.getElementById("dark").style.display = "none";
-                        document.getElementById("light").style.display = "block";
-                      }
-                      localStorage.setItem('valeTheme', theme);                  
-                    }
+                    
                 </script>
             </body>
         </html>
