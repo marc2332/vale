@@ -2,6 +2,8 @@
 title: 1. Introduction
 ---
 
+> WORK IN PROGRESS ⚠️ Expect breaking changes ⚠️
+
 # 👋 Introduction
 
 **Vale** is a static documentation generator, designed for speed, simplicity and

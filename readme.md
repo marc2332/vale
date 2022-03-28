@@ -1,3 +1,5 @@
+> WORK IN PROGRESS ⚠️ Expect breaking changes ⚠️
+
 # 📝 Vale
 
 **Vale** is a static documentation generator, designed for speed, simplicity and
