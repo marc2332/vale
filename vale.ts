@@ -57,12 +57,12 @@ const stylesPathCached = (await cache(stylesPath)).path;
 
 export default async function build(
   projectFolder: string,
-): Promise<ProcessResult> {
+) {
   const folderMetadata: Metadata = JSON.parse(
     await Deno.readTextFile(join(projectFolder, "metadata.json")),
   );
 
-  let result = {} as ProcessResult;
+  const result: ProcessResult[] = [];
 
   // Create the dist folder
   const projectDist = join(projectFolder, "dist");
@@ -73,6 +73,8 @@ export default async function build(
   await Deno.copyFile(stylesPathCached, stylesDistPath);
 
   const docsFolders = await Deno.readDir(projectFolder);
+
+  let langIndex = 0;
 
   for await (const langFolder of docsFolders) {
     // Ignore files and the dist folder
@@ -147,17 +149,20 @@ export default async function build(
       lastEntry = processResult.lastEntry;
 
       if (categoryIndex === 0) {
-        result = processResult;
+        result.push(processResult);
       }
 
       categoryIndex++;
     }
+
+    const indexFilePath = join(dist, `index.html`);
+    await Deno.writeTextFile(indexFilePath, result[langIndex].code);
+
+    langIndex++;
   }
 
   const indexFilePath = join(projectDist, `index.html`);
-  await Deno.writeTextFile(indexFilePath, result.code);
-
-  return result;
+  await Deno.writeTextFile(indexFilePath, result[0].code);
 }
 
 async function getDocsFromFile(filePath: string): Promise<TreeFile> {
