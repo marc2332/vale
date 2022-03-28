@@ -84,6 +84,14 @@ main a:hover {
     text-decoration: underline;
 }
 
+main blockquote {
+    padding: 10px 20px;
+    margin: 5px 0px;
+    background: rgb(255 242 220);
+    border: 1px solid rgb(234 185 67);
+    border-radius: 8px;
+}
+
 #navbar {
     height: 50px;
     box-sizing: border-box;
