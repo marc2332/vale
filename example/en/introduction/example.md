@@ -4,14 +4,14 @@ title: 1.1 Example
 
 # Example
 
-You can try with the official Vale website:
+Use the template generator to create a new template.
 
 ```bash
-git clone https://github.com/marc2332/vale
+vale init my-demo
 ```
 
 Run in development mode:
 
 ```
-vale watch example
+vale watch my-demo
 ```

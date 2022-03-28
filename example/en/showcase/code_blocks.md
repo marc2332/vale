@@ -2,6 +2,8 @@
 title: 3.1 Code Blocks
 ---
 
+# Code blocks
+
 TypeScript code:
 
 ```ts
