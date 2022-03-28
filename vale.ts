@@ -64,10 +64,10 @@ const stylesPath = join(__dirname, "styles.css");
 const stylesPathCached = (await cache(stylesPath)).path;
 
 export default async function build(
-  projectFolder: string,
+  projectFolder: string
 ): Promise<ProcessResult> {
   const folderMetadata: Metadata = JSON.parse(
-    await Deno.readTextFile(join(projectFolder, "metadata.json")),
+    await Deno.readTextFile(join(projectFolder, "metadata.json"))
   );
 
   let result = {} as ProcessResult;
@@ -90,7 +90,7 @@ export default async function build(
 
     // Get the sidebar configuration
     const sidebarConfig: Sidebar = JSON.parse(
-      await Deno.readTextFile(join(categoryFolder, "sidebar.json")),
+      await Deno.readTextFile(join(categoryFolder, "sidebar.json"))
     );
 
     // Create the dist folder for the language
@@ -145,20 +145,16 @@ export default async function build(
       const processResult = await processCategory(
         folderMetadata,
         langFolder.name,
-        
         dist,
         doc,
         orderedContent,
         lastEntry || prevCategoryDoc?.doc?.entry,
-        nextCategoryDoc?.doc?.entry,
+        nextCategoryDoc?.doc?.entry
       );
-
       lastEntry = processResult.lastEntry;
-
       if (categoryIndex === 0) {
         result = processResult;
       }
-
       categoryIndex++;
     }
   }
@@ -193,7 +189,7 @@ async function lookInFolder(folder: string): Promise<Array<TreeFile>> {
 
 async function getCategoryData(
   folderPath: string,
-  entries: Array<TreeFile>,
+  entries: Array<TreeFile>
 ): Promise<TreeFile> {
   const dataFilePath = join(folderPath, "__category.md");
   try {
@@ -214,15 +210,13 @@ async function getCategoryData(
 
 function orderSidebarCategories(
   sidebarConfig: Sidebar,
-  docContents: Map<string, ContentDoc>,
+  docContents: Map<string, ContentDoc>
 ): CategoryData[] {
   return Object.entries(sidebarConfig).map(([name, entries]) => {
     const doc = docContents.get(name);
     if (doc != null) {
       // Order the entries by the sidebar or der
-
       const filteredEntries = new Map();
-
       entries.forEach((entryTitle) => {
         const res = doc.entries.get(entryTitle);
         if (res != null) {
@@ -243,22 +237,24 @@ function orderSidebarCategories(
 function sidebarToHTML(
   langCode: string,
   categories: CategoryData[],
-  entryActiveTitle: string,
+  entryActiveTitle: string
 ): string {
-  const links = categories.map(
-    ({ name, doc: { entry: categoryEntry, entries } }) => {
+  const links = categories
+    .map(({ name, doc: { entry: categoryEntry, entries } }) => {
       const isCategoryActive = entryActiveTitle == categoryEntry.title;
       const categoryClass = isCategoryActive ? "active" : "";
-
-      const categoryEntries = Array.from(entries).map(([_, entry]) => {
-        const isNotCategoryDoc = categoryEntry.path !== entry.path;
-        const isActive = entryActiveTitle == entry.title;
-        const entryClass = isActive ? "active" : "";
-
-        return isNotCategoryDoc &&
-          `<li><a class="${entryClass}" href="/${langCode}/${entry.path}.html">${entry.title}</a></li>`;
-      }).filter(Boolean).join("");
-
+      const categoryEntries = Array.from(entries)
+        .map(([_, entry]) => {
+          const isNotCategoryDoc = categoryEntry.path !== entry.path;
+          const isActive = entryActiveTitle == entry.title;
+          const entryClass = isActive ? "active" : "";
+          return (
+            isNotCategoryDoc &&
+            `<li><a class="${entryClass}" href="/${langCode}/${entry.path}.html">${entry.title}</a></li>`
+          );
+        })
+        .filter(Boolean)
+        .join("");
       return `
         <div>
             <a class="${categoryClass}" href="/${langCode}/${categoryEntry.path}.html"><b>${name}</b></a>
@@ -269,9 +265,8 @@ function sidebarToHTML(
             </div>
         </div>
       `;
-    },
-  ).join("");
-
+    })
+    .join("");
   return `
     <div id="sidebar-menu">
       ${links}
@@ -290,11 +285,10 @@ function getDocEntry(treeFile: TreeFile, categoryTree: TreeFile): DocEntry {
 function docToHTML(
   folderMetadata: Metadata,
   langCode: string,
-
   entry: DocEntry,
   orderedContent: CategoryData[],
   prevEntry?: DocEntry,
-  nextEntry?: DocEntry,
+  nextEntry?: DocEntry
 ): string {
   const sidebarHTML = sidebarToHTML(langCode, orderedContent, entry.title);
 
@@ -303,8 +297,6 @@ function docToHTML(
       language.code === langCode ? "selected" : ""
     } >${language.name}</option>`;
   });
-
-  
 
   const prevButton = prevEntry
     ? `<a class="prev" href="/${langCode}/${prevEntry.path}.html"><button> ← ${prevEntry.title}</button></a>`
@@ -333,7 +325,6 @@ function docToHTML(
                           <button id="light" onclick="toggleTheme('light')">${sunSvg} </button>
                           <button id="dark" onclick="toggleTheme('dark')">${moonSvg} </button>
                         </span>
-
                     </div>
                     <button onclick="toggleSideBar()">
                         ${svgMenu}
@@ -352,8 +343,6 @@ function docToHTML(
                     </main>
                 </div>
                 <script>
-                    
-                    
                     getInitialTheme();
                     function getInitialTheme(){
                       const theme = localStorage.getItem('valeTheme');
@@ -394,11 +383,8 @@ function docToHTML(
                       else{
                         document.getElementById("dark").style.display = "none";
                         document.getElementById("light").style.display = "block";
-
                       }
-                      localStorage.setItem('valeTheme', theme);
-
-                      
+                      localStorage.setItem('valeTheme', theme);                  
                     }
                 </script>
             </body>
@@ -409,16 +395,14 @@ function docToHTML(
 async function processCategory(
   folderMetadata: Metadata,
   langCode: string,
- 
   dist: string,
   { entry: categoryEntry, entries }: ContentDoc,
   orderedContent: CategoryData[],
   prevCategoryEntry?: DocEntry,
-  nextCategoryEntry?: DocEntry,
+  nextCategoryEntry?: DocEntry
 ): Promise<ProcessResult> {
   // Use the the next category as next page
   let nextCategoryEntryConfig = nextCategoryEntry;
-
   // Save last entry for the next categories
   let lastEntry: DocEntry | undefined;
 
@@ -428,20 +412,22 @@ async function processCategory(
   await Promise.all(
     Array.from(entries).map(
       async ([_title, fileEntry], fileIndex, listEntries) => {
-        const [_prevTitle, prevEntry] = listEntries[fileIndex - 1] ||
-          [null, categoryEntry];
-        const [_nextTitle, nextEntry] = listEntries[fileIndex + 1] ||
-          [null, nextCategoryEntry];
+        const [_prevTitle, prevEntry] = listEntries[fileIndex - 1] || [
+          null,
+          categoryEntry,
+        ];
+        const [_nextTitle, nextEntry] = listEntries[fileIndex + 1] || [
+          null,
+          nextCategoryEntry,
+        ];
 
         const code = docToHTML(
           folderMetadata,
           langCode,
-          
-          
           fileEntry,
           orderedContent,
           prevEntry,
-          nextEntry,
+          nextEntry
         );
         const filePath = `${fileEntry.path}.html`;
         await Deno.writeTextFile(join(dist, filePath), code);
@@ -453,18 +439,17 @@ async function processCategory(
         if (fileIndex == listEntries.length - 1) {
           lastEntry = fileEntry;
         }
-      },
-    ),
+      }
+    )
   );
 
   const code = docToHTML(
     folderMetadata,
     langCode,
-   
     categoryEntry,
     orderedContent,
     prevCategoryEntry,
-    nextCategoryEntryConfig,
+    nextCategoryEntryConfig
   );
   const filePath = join(dist, `${categoryEntry.path}.html`);
   await Deno.writeTextFile(filePath, code);
