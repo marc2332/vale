@@ -36,7 +36,7 @@ interface DocEntry {
 
 interface ContentDoc {
   entry: DocEntry;
-  entries: DocEntry[];
+  entries: Map<string, DocEntry>;
 }
 
 interface ProcessResult {
@@ -110,7 +110,7 @@ export default async function build(
 
         docContents.set(treeCategory.title, {
           entry: categoryEntry,
-          entries: [],
+          entries: new Map(),
         });
 
         const contentCategory = docContents.get(treeCategory.title);
@@ -119,7 +119,7 @@ export default async function build(
           if (treeFile.entries == null) {
             const fileEntry = getDocEntry(treeFile, treeCategory);
 
-            contentCategory?.entries.push(fileEntry);
+            contentCategory?.entries.set(fileEntry.path, fileEntry);
           }
         }
       }
@@ -174,7 +174,7 @@ async function lookInFolder(folder: string): Promise<Array<TreeFile>> {
   const entries = Deno.readDir(folder);
   const treeFiles = [];
   for await (const entry of entries) {
-    if (entry.isFile) {
+    if (entry.isFile && entry.name != "__category.md") {
       const treeFile = await getDocsFromFile(join(folder, entry.name));
       treeFiles.push(treeFile);
     }
@@ -211,11 +211,15 @@ function orderSidebarCategories(
     const doc = docContents.get(name);
     if (doc != null) {
       // Order the entries by the sidebar or der
-      doc.entries = entries.map((entryTitle) => {
-        return doc.entries.find((en) =>
-          en.title === entryTitle || en.title === name
-        );
-      }).filter(Boolean) as DocEntry[];
+
+      const filteredEntries = new Map();
+
+      entries.forEach((entryTitle) => {
+        const res = doc.entries.get(entryTitle);
+        if (res != null) {
+          filteredEntries.set(entryTitle, res);
+        }
+      });
 
       return {
         name,
@@ -237,7 +241,7 @@ function sidebarToHTML(
       const isCategoryActive = entryActiveTitle == categoryEntry.title;
       const categoryClass = isCategoryActive ? "active" : "";
 
-      const categoryEntries = entries.map((entry) => {
+      const categoryEntries = Array.from(entries).map(([_, entry]) => {
         const isNotCategoryDoc = categoryEntry.path !== entry.path;
         const isActive = entryActiveTitle == entry.title;
         const entryClass = isActive ? "active" : "";
@@ -269,7 +273,7 @@ function sidebarToHTML(
 function getDocEntry(treeFile: TreeFile, categoryTree: TreeFile): DocEntry {
   return {
     content: treeFile.content || "",
-    path: `${categoryTree.path}/${treeFile.path}`,
+    path: `${categoryTree.path}/${parse(treeFile.path).name}`,
     title: treeFile.title,
   };
 }
@@ -372,29 +376,35 @@ async function processCategory(
   const folderPath = join(dist, dirname(categoryEntry.path));
   await Deno.mkdir(folderPath, { recursive: true });
 
-  await Promise.all(entries.map(async (fileEntry, fileIndex) => {
-    const prevEntry = entries[fileIndex - 1] || categoryEntry;
-    const nextEntry = entries[fileIndex + 1] || nextCategoryEntry;
+  await Promise.all(
+    Array.from(entries).map(
+      async ([_title, fileEntry], fileIndex, listEntries) => {
+        const [_prevTitle, prevEntry] = listEntries[fileIndex - 1] ||
+          [null, categoryEntry];
+        const [_nextTitle, nextEntry] = listEntries[fileIndex + 1] ||
+          [null, nextCategoryEntry];
 
-    const code = docToHTML(
-      folderMetadata,
-      langCode,
-      fileEntry,
-      orderedContent,
-      prevEntry,
-      nextEntry,
-    );
-    const filePath = `${fileEntry.path}.html`;
-    await Deno.writeTextFile(join(dist, filePath), code);
+        const code = docToHTML(
+          folderMetadata,
+          langCode,
+          fileEntry,
+          orderedContent,
+          prevEntry,
+          nextEntry,
+        );
+        const filePath = `${fileEntry.path}.html`;
+        await Deno.writeTextFile(join(dist, filePath), code);
 
-    if (fileIndex === 0) {
-      // Use the first category entry as the next page for the category
-      nextCategoryEntryConfig = fileEntry;
-    }
-    if (fileIndex == entries.length - 1) {
-      lastEntry = fileEntry;
-    }
-  }));
+        if (fileIndex === 0) {
+          // Use the first category entry as the next page for the category
+          nextCategoryEntryConfig = fileEntry;
+        }
+        if (fileIndex == listEntries.length - 1) {
+          lastEntry = fileEntry;
+        }
+      },
+    ),
+  );
 
   const code = docToHTML(
     folderMetadata,
