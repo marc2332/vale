@@ -4,4 +4,4 @@ export PATH="/opt/buildhome/.deno/bin:$PATH"
 mkdir dist
 echo "Building website with Vale..."
 
-deno run -A —unstable build_website.ts
+deno run -A --unstable build_website.ts
