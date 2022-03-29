@@ -63,7 +63,7 @@ You now need to create and push this project into a repository in Github.
 
 ## 4. Link in Deno Deploy
 
-Now, go to [Deno Deploy](https://deno.land/deploy/), create a new project and link the same respository you created on Github into your Deno Deploy project.
+Now, go to [Deno Deploy](https://deno.land/deploy/), create a new project with the same name you put on `YOUR_DENO_DEPLOY_PROJECT_NAME` and link the same respository you created on Github into your Deno Deploy project.
 
 ## 5. Awesome!
 
