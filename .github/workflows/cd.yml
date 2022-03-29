@@ -18,10 +18,10 @@ jobs:
           deno-version: vx.x.x
 
       - name: Build the website
-        run: deno run -A --unstable build_website.ts
+        run: deno run -A --unstable ./docs/build.ts
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
           project: "vale"
-          entrypoint: "./website.ts"
+          entrypoint: "./docs/server.ts"

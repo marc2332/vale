@@ -5,7 +5,7 @@ import {
   serveFile,
 } from "https://deno.land/std@0.132.0/http/file_server.ts";
 
-const projectPath = join(Deno.cwd(), "docs");
+const projectPath = Deno.cwd();
 const distPath = join(projectPath, "dist");
 
 serve((req) => {
