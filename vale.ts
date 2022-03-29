@@ -1,11 +1,5 @@
-import { Marked } from "https://deno.land/x/markdown@v2.0.0/mod.ts";
-import {
-  basename,
-  dirname,
-  join,
-  parse,
-} from "https://deno.land/std@0.122.0/path/mod.ts";
-import { cache } from "https://deno.land/x/cache@0.2.13/mod.ts";
+import { basename, dirname, join, Marked, parse } from "./deps.ts";
+import { CachedAssets, getCachedAssets } from "./utils.ts";
 
 interface CategoryData {
   name: string;
@@ -46,27 +40,11 @@ interface ProcessResult {
   lastEntry: DocEntry | undefined;
 }
 
-const __dirname = dirname(import.meta.url);
-
-// Cache the SVG files
-const svgMenuPath = join(__dirname, "menu.svg");
-const svgMenuPathCached = (await cache(svgMenuPath)).path;
-const svgMenu = await Deno.readTextFile(svgMenuPathCached);
-
-const sunSvgPath = join(__dirname, "sun.svg");
-const sunSvgPathCached = (await cache(sunSvgPath)).path;
-const sunSvg = await Deno.readTextFile(sunSvgPathCached);
-
-const moonSvgPath = join(__dirname, "moon.svg");
-const moonSvgPathCached = (await cache(moonSvgPath)).path;
-const moonSvg = await Deno.readTextFile(moonSvgPathCached);
-
-const stylesPath = join(__dirname, "styles.css");
-const stylesPathCached = (await cache(stylesPath)).path;
-
 export default async function build(
   projectFolder: string,
 ) {
+  const assets = await getCachedAssets();
+
   const folderMetadata: Metadata = JSON.parse(
     await Deno.readTextFile(join(projectFolder, "metadata.json")),
   );
@@ -79,7 +57,7 @@ export default async function build(
 
   // Copy styles.css
   const stylesDistPath = join(projectDist, "styles.css");
-  await Deno.copyFile(stylesPathCached, stylesDistPath);
+  await Deno.copyFile(assets.stylesPathCached, stylesDistPath);
 
   const docsFolders = await Deno.readDir(projectFolder);
 
@@ -161,6 +139,7 @@ export default async function build(
         dist,
         doc,
         finalOrderedContent,
+        assets,
         lastEntry || prevCategoryDoc?.doc?.entry,
         nextCategoryDoc?.doc?.entry,
       );
@@ -318,6 +297,7 @@ function docToHTML(
   langCode: string,
   entry: DocEntry,
   orderedContent: CategoryData[],
+  assets: CachedAssets,
   prevEntry?: DocEntry,
   nextEntry?: DocEntry,
 ): string {
@@ -353,10 +333,10 @@ function docToHTML(
                     <div>
                         <h4>${folderMetadata.title}</h4>
                         <select id="language" onchange="languageChanged()">${languages}</select>
-                        <button id="theme-toggler" onclick="toggleTheme()">${sunSvg}</button>
+                        <button id="theme-toggler" onclick="toggleTheme()">${assets.sunSvg}</button>
                     </div>
                     <button id="sidebar-toggler" onclick="toggleSideBar()">
-                        ${svgMenu}
+                        ${assets.svgMenu}
                     </button>
                 </div>
                 <div id="content">
@@ -379,12 +359,12 @@ function docToHTML(
 
                     function updateToggler(isDarkMode){
                       if(isDarkMode) {
-                        themeToggler.innerHTML = \`${moonSvg}\`;
+                        themeToggler.innerHTML = \`${assets.moonSvg}\`;
                         document.getElementById("hightlight-light").setAttribute("disabled", "disabled");
                         document.getElementById("hightlight-dark").removeAttribute("disabled");
                       }
                       else{
-                        themeToggler.innerHTML = \`${sunSvg}\`;
+                        themeToggler.innerHTML = \`${assets.sunSvg}\`;
                         document.getElementById("hightlight-dark").setAttribute("disabled", "disabled");
                         document.getElementById("hightlight-light").removeAttribute("disabled");
                       }
@@ -438,6 +418,7 @@ async function processCategory(
   dist: string,
   { entry: categoryEntry, entries }: ContentDoc,
   orderedContent: CategoryData[],
+  assets: CachedAssets,
   prevCategoryEntry?: DocEntry,
   nextCategoryEntry?: DocEntry,
 ): Promise<ProcessResult> {
@@ -466,6 +447,7 @@ async function processCategory(
           langCode,
           fileEntry,
           orderedContent,
+          assets,
           prevEntry,
           nextEntry,
         );
@@ -488,6 +470,7 @@ async function processCategory(
     langCode,
     categoryEntry,
     orderedContent,
+    assets,
     prevCategoryEntry,
     nextCategoryEntryConfig,
   );

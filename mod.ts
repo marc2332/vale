@@ -1,11 +1,15 @@
-import { extname, join } from "https://deno.land/std@0.122.0/path/mod.ts";
-import { Command, CompletionsCommand, HelpCommand } from "./deps.ts";
-import build from "./vale.ts";
-import { serve } from "https://deno.land/std@0.132.0/http/server.ts";
 import {
+  Command,
+  CompletionsCommand,
+  extname,
+  HelpCommand,
+  join,
+  serve,
   serveDir,
   serveFile,
-} from "https://deno.land/std@0.132.0/http/file_server.ts";
+} from "./deps.ts";
+import { clearAssetsCache } from "./utils.ts";
+import build from "./vale.ts";
 
 const PORT = Deno.env.get("PORT") || 3500;
 
@@ -88,7 +92,10 @@ await new Command()
     "watch <dir:string> [optional]",
     "Run the documentation in development mode.",
   )
-  .action(async (_, dir: string) => {
+  .option("-r, --reload [reload:boolean]", "Reload vale assets")
+  .action(async ({ reload }, dir: string) => {
+    if (reload) await clearAssetsCache();
+
     const [projectPath, distPath] = buildCommand(dir);
     await build(projectPath);
 
@@ -108,7 +115,10 @@ await new Command()
     "build <dir:string> [optional]",
     "Build the documentation.",
   )
-  .action(async (_, dir: string) => {
+  .option("-r, --reload [reload:boolean]", "Reload vale assets")
+  .action(async ({ reload }, dir: string) => {
+    if (reload) await clearAssetsCache();
+
     const projectPath = join(Deno.cwd(), dir);
     await build(projectPath);
     console.log("Built successfully!");
