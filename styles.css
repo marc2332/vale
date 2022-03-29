@@ -44,7 +44,7 @@ body.dark-theme {
     padding: 30px;
     background: var(--background-sidebar-color);
     border-right: 1px solid var(--border);
-    min-width: 160px;
+    min-width: 215px;
     overflow: auto;
 }
 
