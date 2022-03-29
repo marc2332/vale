@@ -1,5 +1,5 @@
 ---
-title: 2. Customization
+title: 3. Customization
 ---
 
 # Customization

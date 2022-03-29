@@ -1,5 +1,5 @@
 ---
-title: 2.1 Barre latérale
+title: 3.1 Barre latérale
 ---
 
 # Barre latérale

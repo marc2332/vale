@@ -1,5 +1,5 @@
 ---
-title: 2.1 Sidebar
+title: 3.1 Sidebar
 ---
 
 # Sidebar

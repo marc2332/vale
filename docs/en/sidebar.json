@@ -3,11 +3,14 @@
     "1.1 Example",
     "1.2 Test"
   ],
-  "2. Customization": [
-    "2.1 Sidebar",
-    "2.2 Themes"
+  "2. Guides": [
+    "2.1 Deploy in Deno Deploy"
   ],
-  "3. Showcase": [
-    "3.1 Code Blocks"
+  "3. Customization": [
+    "3.1 Sidebar",
+    "3.2 Themes"
+  ],
+  "4. Showcase": [
+    "4.1 Code Blocks"
   ]
 }

@@ -2,11 +2,14 @@
   "1. Introduction": [
     "1.1 Exemple"
   ],
-  "2. Personnalisation": [
-    "2.1 Barre latérale",
-    "2.2 Themes"
+  "2. Guides": [
+    "2.1 Deploy in Deno Deploy"
   ],
-  "3. Showcase": [
+  "3. Personnalisation": [
+    "3.1 Barre latérale",
+    "3.2 Themes"
+  ],
+  "4. Showcase": [
     "3.1 Blocs de code"
   ]
 }
