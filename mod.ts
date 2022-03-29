@@ -42,6 +42,7 @@ const initCommand = async (projectPath: string, title: string) => {
     join(projectPath, "metadata.json"),
     JSON.stringify({
       title,
+      reference: "en",
       languages: [
         {
           name: "English",

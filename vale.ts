@@ -23,6 +23,7 @@ type Tree = Array<TreeFile | TreeFile>;
 
 interface Metadata {
   title: string;
+  reference: string;
   languages: { code: string; name: string }[];
 }
 
@@ -65,7 +66,7 @@ const stylesPathCached = (await cache(stylesPath)).path;
 
 export default async function build(
   projectFolder: string,
-){
+) {
   const folderMetadata: Metadata = JSON.parse(
     await Deno.readTextFile(join(projectFolder, "metadata.json")),
   );
@@ -81,6 +82,8 @@ export default async function build(
   await Deno.copyFile(stylesPathCached, stylesDistPath);
 
   const docsFolders = await Deno.readDir(projectFolder);
+
+  let referenceContent: CategoryData[] = [];
 
   let langIndex = 0;
 
@@ -136,20 +139,28 @@ export default async function build(
     }
 
     const orderedContent = orderSidebarCategories(sidebarConfig, docContents);
+    const finalOrderedContent = mergeContentWithReferenceContent(
+      referenceContent,
+      orderedContent,
+    );
+
+    if (langFolder.name === folderMetadata.reference) {
+      referenceContent = orderedContent;
+    }
 
     let lastEntry: DocEntry | undefined;
     let categoryIndex = 0;
 
-    for (const { doc } of orderedContent) {
-      const prevCategoryDoc = orderedContent[categoryIndex - 1];
-      const nextCategoryDoc = orderedContent[categoryIndex + 1];
+    for (const { doc } of finalOrderedContent) {
+      const prevCategoryDoc = finalOrderedContent[categoryIndex - 1];
+      const nextCategoryDoc = finalOrderedContent[categoryIndex + 1];
 
       const processResult = await processCategory(
         folderMetadata,
         langFolder.name,
         dist,
         doc,
-        orderedContent,
+        finalOrderedContent,
         lastEntry || prevCategoryDoc?.doc?.entry,
         nextCategoryDoc?.doc?.entry,
       );
@@ -168,6 +179,21 @@ export default async function build(
 
   const indexFilePath = join(projectDist, `index.html`);
   await Deno.writeTextFile(indexFilePath, result[0].code);
+}
+
+function mergeContentWithReferenceContent(
+  referenceContent: CategoryData[],
+  content: CategoryData[],
+): CategoryData[] {
+  if (referenceContent.length == 0) return content;
+  const mergedContent = [...referenceContent];
+  content.forEach((category, i) => {
+    category.doc.entries.forEach((entry) => {
+      mergedContent[i].doc.entries.set(entry.path, entry);
+    });
+    mergedContent[i].doc.entry = category.doc.entry;
+  });
+  return mergedContent;
 }
 
 async function getDocsFromFile(filePath: string): Promise<TreeFile> {
@@ -375,7 +401,6 @@ function docToHTML(
 
                     function toggleTheme(){
                       const isDarkMode = localStorage.getItem("valeTheme") === "true";
-                      console.log(!isDarkMode)
                       loadTheme(!isDarkMode)
                       localStorage.setItem("valeTheme", !isDarkMode);
                     }

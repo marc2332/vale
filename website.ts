@@ -1,7 +1,4 @@
-import {
-  extname,
-  join,
-} from "https://deno.land/std@0.122.0/path/mod.ts";
+import { extname, join } from "https://deno.land/std@0.122.0/path/mod.ts";
 import { serve } from "https://deno.land/std@0.132.0/http/server.ts";
 import {
   serveDir,
