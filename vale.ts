@@ -72,9 +72,14 @@ export default async function build(
     const categoryFolder = join(projectFolder, langFolder.name);
 
     // Get the sidebar configuration
-    const sidebarConfig: Sidebar = JSON.parse(
-      await Deno.readTextFile(join(categoryFolder, "sidebar.json")),
-    );
+    let sidebarConfig: Sidebar;
+    try {
+      sidebarConfig = JSON.parse(
+        await Deno.readTextFile(join(categoryFolder, "sidebar.json")),
+      );
+    } catch {
+      continue;
+    }
 
     // Create the dist folder for the language
     const dist = join(projectDist, langFolder.name);
