@@ -52,7 +52,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "YOUR_DENO_DEPLOY_PROJECT_NAME"
-          entrypoint: "./docs/server.ts"
+          entrypoint: "./server.ts"
 ```
 
 You must change `YOUR_DENO_DEPLOY_PROJECT_NAME` to a non-taken project name in Deno Deploy, try puting `vale-<your-nickname>`.
