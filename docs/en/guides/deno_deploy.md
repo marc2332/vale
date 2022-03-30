@@ -46,7 +46,7 @@ jobs:
         run: deno install --allow-env --allow-read --allow-write --allow-net --unstable -n vale https://deno.land/x/vale@0.1.4/mod.ts
 
       - name: Build the website
-        run: vale build .
+        run: vale build docs
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
