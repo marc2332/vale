@@ -6,7 +6,8 @@ title: 2.1 Deploy in Deno Deploy
 
 # Deploy in Deno Deploy
 
-Want to deploy a Vale project into [Deno Deploy](https://deno.com/deploy/)? It's possible!
+Want to deploy a Vale project into [Deno Deploy](https://deno.com/deploy/)? It's
+possible!
 
 ## 1. Create Project
 
@@ -18,7 +19,8 @@ git clone https://github.com/marc2332/vale-deno-deploy.git
 
 ## 2. Overview
 
-Now, in order to deploy a Vale website in Deno Deploy we need a small Github Action workflow in order to build the website.
+Now, in order to deploy a Vale website in Deno Deploy we need a small Github
+Action workflow in order to build the website.
 
 You can see this workflow under `.github/workflows/deploy.yml`:
 
@@ -55,7 +57,8 @@ jobs:
           entrypoint: "./server.ts"
 ```
 
-You must change `YOUR_DENO_DEPLOY_PROJECT_NAME` to a non-taken project name in Deno Deploy, try puting `vale-<your-nickname>`.
+You must change `YOUR_DENO_DEPLOY_PROJECT_NAME` to a non-taken project name in
+Deno Deploy, try puting `vale-<your-nickname>`.
 
 ## 3. Create a repository in Github
 
@@ -63,7 +66,9 @@ You now need to create and push this project into a repository in Github.
 
 ## 4. Link in Deno Deploy
 
-Now, go to [Deno Deploy](https://deno.com/deploy/), create a new project with the same name you put on `YOUR_DENO_DEPLOY_PROJECT_NAME` and link the same respository you created on Github into your Deno Deploy project.
+Now, go to [Deno Deploy](https://deno.com/deploy/), create a new project with
+the same name you put on `YOUR_DENO_DEPLOY_PROJECT_NAME` and link the same
+respository you created on Github into your Deno Deploy project.
 
 ## 5. Awesome!
 
