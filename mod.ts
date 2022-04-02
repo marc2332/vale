@@ -9,12 +9,12 @@ import {
   serveFile,
 } from "./deps.ts";
 import { clearAssetsCache } from "./utils.ts";
-import build from "./vale.ts";
+import { ValeBuilder } from "./vale.ts";
 
 const PORT = Deno.env.get("PORT") || 3500;
 
 const serveCommand = (distPath: string) => {
-  serve((req) => {
+  serve((req: Request) => {
     const pathname = new URL(req.url).pathname;
     if (extname(pathname) == "") {
       return serveFile(req, join(distPath, pathname, "index.html"));
@@ -93,11 +93,12 @@ await new Command()
     "Run the documentation in development mode.",
   )
   .option("-r, --reload [reload:boolean]", "Reload vale assets")
-  .action(async ({ reload }, dir: string) => {
+  .action(async ({ reload }: { reload: boolean }, dir: string) => {
     if (reload) await clearAssetsCache();
 
     const [projectPath, distPath] = buildCommand(dir);
-    await build(projectPath);
+    const builder = await ValeBuilder.create(projectPath);
+    await builder.build();
 
     serveCommand(distPath);
 
@@ -108,7 +109,7 @@ await new Command()
       if (event.paths.find((path) => path.startsWith(distPath))) {
         continue;
       }
-      await build(projectPath);
+      await builder.build();
     }
   })
   .command(
@@ -116,11 +117,12 @@ await new Command()
     "Build the documentation.",
   )
   .option("-r, --reload [reload:boolean]", "Reload vale assets")
-  .action(async ({ reload }, dir: string) => {
+  .action(async ({ reload }: { reload: boolean }, dir: string) => {
     if (reload) await clearAssetsCache();
 
     const projectPath = join(Deno.cwd(), dir);
-    await build(projectPath);
+    const builder = await ValeBuilder.create(projectPath);
+    await builder.build();
     console.log("Built successfully!");
   })
   .command(

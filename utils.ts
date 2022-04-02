@@ -1,17 +1,10 @@
 import { dirname, join } from "https://deno.land/std@0.122.0/path/mod.ts";
-
 import { namespace } from "https://deno.land/x/cache@0.2.13/mod.ts";
+import { CachedAssets } from "./types.ts";
 
 const __dirname = dirname(import.meta.url);
 
 const valeNamespace = namespace("vale");
-
-export interface CachedAssets {
-  svgMenu: string;
-  sunSvg: string;
-  moonSvg: string;
-  stylesPathCached: string;
-}
 
 export const getCachedAssets = async (): Promise<CachedAssets> => {
   // Cache the SVG files
